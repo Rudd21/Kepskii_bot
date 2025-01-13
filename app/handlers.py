@@ -3,6 +3,7 @@ from aiogram.types import Message, CallbackQuery, FSInputFile, InputFile
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
+from dotenv import load_dotenv
 from sqlalchemy import select
 import os
 
@@ -10,8 +11,10 @@ import app.keyboards as kb
 import app.database.requests as rq
 from app.database.models import async_session
 
+load_dotenv(dotenv_path="C:/Users/Taras/Desktop/SamKepskiiBOT/.venv/.env")
+
 router_user = Router()
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+BOT_TOKEN = Bot(token=os.getenv("BOT_TOKEN"))
 
 # Глобальна змінна для зберігання поточного шляху
 BASE_DIR = "FKEP"
@@ -96,7 +99,10 @@ async def back_to_FKEP(callback: CallbackQuery):
     await callback.message.edit_text(
         
         "У вас є можливість надіслати 5 завданнь, яких ще немає в боті і получити - допомогу адміністратора з презинтацією, практичною з графічного дизайну, вебсайтом, грою на python, лабораторна з Технологій\n\n"
-        "Будь ласка не скидуйте завдання від Балабаника, у неї так всі завдання в мудлі\n\n"
+        "Команди:\n"
+        "/to_send_content - надіслати контект адміністрації\n"
+        "/to_check_progress - перевірка кількості своїх скинутих завданнь\n\n"
+        "Будь ласка не скидуйте завдання від Балабаника, у неї і так всі завдання в мудлі\n\n"
         f"Повернуто до базової директорії: {current_dir}", reply_markup=keyboard)
 
 # Надіслати документ адміністрації
@@ -110,13 +116,12 @@ class SendDocument(StatesGroup):
     document = State()
     description = State()
 
-@router_user.callback_query(lambda c: c.data == "to_send_content")
-async def start_register(callback: CallbackQuery, state: FSMContext):
-    await state.update_data(tg_id=callback.from_user.id)
+@router_user.message(Command("to_send_content"))
+async def start_register(message: Message, state: FSMContext):
+    # Ініціалізуємо процес, зберігаючи tg_id користувача
+    await state.update_data(tg_id=message.from_user.id)
     await state.set_state(SendDocument.document)
-    await callback.message.answer("Надішліть ваш документ в форматі архіву")
-    await callback.answer()  # Закриваємо сповіщення
-    await BOT_TOKEN.answer_callback_query(callback.id)
+    await message.answer("Надішліть ваш документ в форматі архіву (zip).")
 
 @router_user.message(SendDocument.document)
 async def register_document(message: Message, state: FSMContext):
@@ -131,41 +136,38 @@ async def register_document(message: Message, state: FSMContext):
     # Збереження документа в стані
     await state.update_data(file_bytes=file_bytes_io.read())
     await state.set_state(SendDocument.description)
-    await message.answer("Файл отримано. Введіть опис")
+    await message.answer("Файл отримано. Введіть опис для файлу.")
 
 @router_user.message(SendDocument.description)
 async def register_description(message: Message, state: FSMContext):
+    # Оновлюємо дані в стані з введеним описом
     await state.update_data(description=message.text)
     data = await state.get_data()
     
-    tg_id = data.get('tg_id', message.from_user.id)  # Отримуємо tg_id з користувача
-    file_bytes = data.get("file_bytes")  # Шлях до файлу
-    description = message.text  # Опис
+    tg_id = data.get('tg_id', message.from_user.id)  # Отримуємо tg_id користувача
+    file_bytes = data.get("file_bytes")  # Отримуємо файл
+    description = message.text  # Опис, який користувач надіслав
 
     # Формуємо ім'я файлу з tg_id і описом
     safe_description = description.replace(" ", "_").replace("/", "_")
     file_name = f'{tg_id}_{safe_description}.zip'
     file_path = os.path.join(DOWNLOADS_PATH, file_name)
 
+    # Збереження файлу на сервері
     with open(file_path, "wb") as file:
         file.write(file_bytes)
 
-    # Логіка для подальшої обробки файлу (за необхідності)
-    await message.answer(
-        f"Ваше завдання збережено.\n"
-        f"Шлях до файлу: {file_name}\n"
-    )
-    
-    await state.clear()
+    # Повідомлення користувачу про успішне збереження
+    await message.answer
 
 
 # Профіль користувача
 class GetUserInfo(StatesGroup):
     user_id = State()
 
-@router_user.callback_query(lambda c: c.data == "to_check_progress")
-async def check_user_progress(callback: CallbackQuery):
-    tg_id = callback.from_user.id  # Автоматично отримуємо Telegram ID користувача
+@router_user.message(Command("to_check_progress"))
+async def check_user_progress(message: types.Message):
+    tg_id = message.from_user.id  # Автоматично отримуємо Telegram ID користувача
 
     async with async_session() as session:
         async with session.begin():
@@ -180,11 +182,9 @@ async def check_user_progress(callback: CallbackQuery):
             f"Прогрес: {user.progress}\n"
             f"Бонуси: {user.bonus}"
         )
-        await callback.message.answer(user_info)
+        await message.answer(user_info)
     else:
-        await callback.message.answer("❌ Ваш профіль не знайдено в базі даних. Можливо, ви ще не зареєстровані.")
-
-    await callback.answer()  # Закриваємо сповіщення
+        await message.answer("❌ Ваш профіль не знайдено в базі даних. Можливо, ви ще не зареєстровані.")
 
 # Heandler на головну
 @router_user.callback_query(lambda c: c.data == "to_main")

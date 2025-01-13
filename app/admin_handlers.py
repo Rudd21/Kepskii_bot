@@ -8,6 +8,7 @@ from aiogram.filters import CommandStart, Command, StateFilter
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from app.database.models import Content, async_session
+from dotenv import load_dotenv
 import tempfile
 from io import BytesIO
 import aiofiles
@@ -17,6 +18,8 @@ import app.keyboards as kb
 import app.database.requests as rq
 
 router_admin = Router()
+
+load_dotenv(dotenv_path="C:/Users/Taras/Desktop/SamKepskiiBOT/.venv/.env")
 
 # Додавання завдання до бази даних
 

@@ -3,6 +3,7 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters import CommandStart
 from aiogram.types import InlineKeyboardMarkup, Message ,InlineKeyboardButton, CallbackQuery
 from aiogram import Router
+from dotenv import load_dotenv
 import os
 
 from app.handlers import router_user, browse_folders, handle_folder_callback
@@ -12,10 +13,13 @@ import app.keyboards as kb
 
 import app.handlers as h
 
-# admin_id = 5815674712
-admin_id = 1259689667
+load_dotenv(dotenv_path="C:/Users/Taras/Desktop/SamKepskiiBOT/.venv/.env")
+# admin_id = 1259689667
+admin_id = 5815674712
 
+BOT_TOKEN = Bot(token=os.getenv("BOT_TOKEN"))
 dp = Dispatcher()
+
 
 @dp.callback_query()
 async def handle_callback(query: CallbackQuery):
@@ -33,7 +37,7 @@ current_dir = h.BASE_DIR
 
 async def main():
     await async_main()
-    bot = Bot(token='7605591332:AAHMNis7iWIfxkpYf5SwC6xcJ1t-9cYBtL8')
+    bot = BOT_TOKEN
     # dp = Dispatcher()
 
     dp.include_router(router_user)
@@ -64,7 +68,10 @@ async def main():
                 "Це бот для студентів КЕПу\n"
                 "Тут можна знайти конрольні, лабораторні, самостійні роботи раніше терміну:\n\n"
                 "У вас є можливість надіслати 5 завданнь, яких ще немає в боті і получити - допомогу адміністратора з презинтацією, практичною з графічного дизайну, вебсайтом, грою на python, лабораторна з Технологій\n\n"
-                "Будь ласка не скидуйте завдання від Балабаника, у неї так всі завдання в мудлі\n", reply_markup=keyboard)
+                "Команди:\n"
+                "/to_send_content - надіслати контект адміністрації\n"
+                "/to_check_progress - перевірка кількості своїх скинутих завданнь\n\n"
+                "Будь ласка не скидуйте завдання від Балабаника, у неї і так всі завдання в мудлі\n", reply_markup=keyboard)
 
         
         # await h.browse_folders(message)
