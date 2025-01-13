@@ -15,9 +15,7 @@ import app.handlers as h
 # admin_id = 5815674712
 admin_id = 1259689667
 
-bot = os.getenv("BOT_TOKEN")
 dp = Dispatcher()
-
 
 @dp.callback_query()
 async def handle_callback(query: CallbackQuery):

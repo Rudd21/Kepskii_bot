@@ -1,5 +1,4 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
-from aiogram.utils.callbackData import generate_callback
 import os
 
 from aiogram.utils.keyboard import InlineKeyboardBuilder

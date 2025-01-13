@@ -3,7 +3,6 @@ from aiogram.types import Message, CallbackQuery, FSInputFile, InputFile
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
-from aiogram.utils.callbackData import parse_callback
 from sqlalchemy import select
 import os
 
@@ -12,7 +11,7 @@ import app.database.requests as rq
 from app.database.models import async_session
 
 router_user = Router()
-bot = bot = os.getenv("BOT_TOKEN")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 # Глобальна змінна для зберігання поточного шляху
 BASE_DIR = "FKEP"
@@ -117,7 +116,7 @@ async def start_register(callback: CallbackQuery, state: FSMContext):
     await state.set_state(SendDocument.document)
     await callback.message.answer("Надішліть ваш документ в форматі архіву")
     await callback.answer()  # Закриваємо сповіщення
-    await bot.answer_callback_query(callback.id)
+    await BOT_TOKEN.answer_callback_query(callback.id)
 
 @router_user.message(SendDocument.document)
 async def register_document(message: Message, state: FSMContext):
@@ -126,8 +125,8 @@ async def register_document(message: Message, state: FSMContext):
         return
 
     # Завантаження документа з Telegram
-    file_info = await bot.get_file(message.document.file_id)
-    file_bytes_io = await bot.download_file(file_info.file_path)
+    file_info = await BOT_TOKEN.get_file(message.document.file_id)
+    file_bytes_io = await BOT_TOKEN.download_file(file_info.file_path)
 
     # Збереження документа в стані
     await state.update_data(file_bytes=file_bytes_io.read())
@@ -193,4 +192,4 @@ async def to_main(callback: CallbackQuery):
     await callback.message.answer("Ви повернулись на головну сторінку.")
     await callback.answer()
     await callback.message.answer('Виберіть нижче курс який вас цікавить:', reply_markup=kb.course)
-    await bot.answer_callback_query(callback.id)
+    await BOT_TOKEN.answer_callback_query(callback.id)
