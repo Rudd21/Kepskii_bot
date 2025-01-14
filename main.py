@@ -2,6 +2,8 @@ import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import CommandStart
 from aiogram.types import InlineKeyboardMarkup, Message ,InlineKeyboardButton, CallbackQuery
+from aiohttp import web
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 from aiogram import Router
 from dotenv import load_dotenv
 import os
@@ -15,11 +17,18 @@ import app.handlers as h
 
 load_dotenv(dotenv_path="C:/Users/Taras/Desktop/SamKepskiiBOT/.venv/.env")
 # admin_id = 1259689667
+PORT = int(os.getenv("PORT", 8080))
 admin_id = 5815674712
 
-BOT_TOKEN = Bot(token=os.getenv("BOT_TOKEN"))
-dp = Dispatcher()
+RENDER_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME")
+WEBHOOK_PATH = "/webhook"
+WEBHOOK_URL = f"https://{RENDER_HOSTNAME}{WEBHOOK_PATH}"
 
+WEBAPP_HOST = "0.0.0.0"  # Хост для запуску
+WEBAPP_PORT = PORT        # Порт для запуску
+
+dp = Dispatcher()
+bot = Bot(token=os.getenv("BOT_TOKEN"))
 
 @dp.callback_query()
 async def handle_callback(query: CallbackQuery):
@@ -35,10 +44,19 @@ async def handle_callback(query: CallbackQuery):
 
 current_dir = h.BASE_DIR
 
+
+# Функції запуску і завершення роботи
+async def on_startup():
+    await bot.set_webhook(WEBHOOK_URL)
+    print(f"Вебхук встановлено: {WEBHOOK_URL}")
+
+async def on_shutdown():
+    await bot.delete_webhook()
+    await bot.session.close()
+    print("Вебхук видалено")
+
 async def main():
-    await async_main()
-    bot = BOT_TOKEN
-    # dp = Dispatcher()
+    await async_main()  # Ініціалізація бази даних
 
     dp.include_router(router_user)
     dp.include_router(router_admin)
@@ -78,11 +96,26 @@ async def main():
     """
     Головна функція запуску бота.
     """
-    await dp.start_polling(bot)
+    # await dp.start_polling(bot)
+
+# Налаштування сервера aiohttp
+async def create_app():
+    app = web.Application()
+
+    # Реєструємо маршрути Aiogram
+    SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path=WEBHOOK_PATH)
+
+    # Налаштовуємо старт і завершення
+    app.on_startup.append(lambda _: asyncio.create_task(on_startup()))
+    app.on_shutdown.append(lambda _: asyncio.create_task(on_shutdown()))
+
+    # Інтегруємо Dispatcher
+    setup_application(app, dp)
+    return app
 
 if __name__ == "__main__":
     try:
-        asyncio.run(main())
+        web.run_app(create_app(), host="0.0.0.0", port=PORT)
     except KeyboardInterrupt:
         print("Бот відключений!")
 
