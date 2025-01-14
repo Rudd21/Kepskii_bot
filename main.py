@@ -22,7 +22,7 @@ admin_id = 5815674712
 
 RENDER_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME")
 WEBHOOK_PATH = "/webhook"
-WEBHOOK_URL = f"https://{RENDER_HOSTNAME}{WEBHOOK_PATH}"
+WEBHOOK_URL = f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}:10000/webhook"
 
 WEBAPP_HOST = "0.0.0.0"  # Хост для запуску
 WEBAPP_PORT = PORT        # Порт для запуску
@@ -48,6 +48,16 @@ current_dir = h.BASE_DIR
 
 
 # Функції запуску і завершення роботи
+
+SHUTDOWN_ENABLED = False  # Спочатку вимкнено
+shutdown_delay = 15 * 60  # 15 хвилин в секундах
+
+async def delayed_shutdown():
+    global SHUTDOWN_ENABLED
+    await asyncio.sleep(shutdown_delay)
+    SHUTDOWN_ENABLED = True
+    print("SHUTDOWN_ENABLED змінено на True через 15 хвилин")
+
 async def on_startup():
     await bot.set_webhook(WEBHOOK_URL)
     print(f"Вебхук встановлено: {WEBHOOK_URL}")
@@ -107,9 +117,15 @@ async def create_app():
     # Реєструємо маршрути Aiogram
     SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path=WEBHOOK_PATH)
 
-    # Налаштовуємо старт і завершення
+    # Налаштовуємо старт
     app.on_startup.append(lambda _: asyncio.create_task(on_startup()))
-    app.on_shutdown.append(lambda _: asyncio.create_task(on_shutdown()))
+
+    # Запускаємо асинхронну задачу для 15 хвилин
+    asyncio.create_task(delayed_shutdown())
+
+    # Додаємо on_shutdown тільки якщо SHUTDOWN_ENABLED True
+    if SHUTDOWN_ENABLED:
+        app.on_shutdown.append(lambda _: asyncio.create_task(on_shutdown()))
 
     # Інтегруємо Dispatcher
     setup_application(app, dp)
