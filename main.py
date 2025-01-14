@@ -17,7 +17,7 @@ import app.handlers as h
 
 load_dotenv(dotenv_path="C:/Users/Taras/Desktop/SamKepskiiBOT/.venv/.env")
 # admin_id = 1259689667
-PORT = int(os.getenv("PORT", 443))
+PORT = 443
 admin_id = 5815674712
 
 RENDER_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME")
