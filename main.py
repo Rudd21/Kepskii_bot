@@ -22,15 +22,13 @@ admin_id = 5815674712
 
 RENDER_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME")
 WEBHOOK_PATH = "/webhook"
-WEBHOOK_URL = f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}:{PORT}/webhook"
+WEBHOOK_URL = f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}/webhook"
 
 WEBAPP_HOST = "0.0.0.0"  # Хост для запуску
 WEBAPP_PORT = PORT        # Порт для запуску
 
 dp = Dispatcher()
 bot = Bot(token=os.getenv("BOT_TOKEN"))
-
-o = "OOOOOO"
 
 @dp.callback_query()
 async def handle_callback(query: CallbackQuery):
