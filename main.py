@@ -17,15 +17,15 @@ import app.handlers as h
 
 load_dotenv(dotenv_path="C:/Users/Taras/Desktop/SamKepskiiBOT/.venv/.env")
 # admin_id = 1259689667
-PORT = 443
+PORT = int(os.getenv("PORT", 443))
 admin_id = 5815674712
 
 RENDER_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME")
 WEBHOOK_PATH = "/webhook"
 WEBHOOK_URL = f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}/webhook"
 
-WEBAPP_HOST = "0.0.0.0"  # Хост для запуску
-WEBAPP_PORT = PORT        # Порт для запуску
+WEBAPP_HOST = os.getenv("WEBAPP_HOST", "0.0.0.0")
+WEBAPP_PORT = int(os.getenv("PORT", 443))
 
 dp = Dispatcher()
 bot = Bot(token=os.getenv("BOT_TOKEN"))
@@ -130,8 +130,4 @@ async def create_app():
     return app
 
 if __name__ == "__main__":
-    try:
-        web.run_app(create_app(), host="0.0.0.0", port=443)
-    except KeyboardInterrupt:
-        print("Бот відключений!")
-
+    web.run_app(create_app(), host=WEBAPP_HOST, port=WEBAPP_PORT)
