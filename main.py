@@ -30,6 +30,8 @@ WEBAPP_PORT = PORT        # Порт для запуску
 dp = Dispatcher()
 bot = Bot(token=os.getenv("BOT_TOKEN"))
 
+o = "OOOOOO"
+
 @dp.callback_query()
 async def handle_callback(query: CallbackQuery):
     """
