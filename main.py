@@ -22,7 +22,7 @@ admin_id = 5815674712
 
 RENDER_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME")
 WEBHOOK_PATH = "/webhook"
-WEBHOOK_URL = f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}:10000/webhook"
+WEBHOOK_URL = f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}:{PORT}/webhook"
 
 WEBAPP_HOST = "0.0.0.0"  # Хост для запуску
 WEBAPP_PORT = PORT        # Порт для запуску
