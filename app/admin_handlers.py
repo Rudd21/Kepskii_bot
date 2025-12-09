@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from aiogram import Bot, Router, types
 from aiogram.types import Message, FSInputFile
 from sqlalchemy import select
@@ -5,6 +6,22 @@ from aiogram.filters import Command
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from app.database.models import async_session
+=======
+from aiogram import Bot, Dispatcher, F , Router, types
+from aiogram.types import Message, CallbackQuery, FSInputFile, InputFile, Document
+# from sqlalchemy.ext.asyncio import AsyncSession
+# from sqlalchemy.future import select
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from aiogram.filters import CommandStart, Command, StateFilter
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.fsm.context import FSMContext
+from app.database.models import Content, async_session
+from dotenv import load_dotenv
+import tempfile
+from io import BytesIO
+import aiofiles
+>>>>>>> 1587da78b16037c3502743504a3705f87a115717
 import os
 
 import app.keyboards as kb
@@ -12,6 +29,11 @@ import app.database.requests as rq
 
 router_admin = Router()
 
+<<<<<<< HEAD
+=======
+load_dotenv(dotenv_path="C:/Users/Taras/Desktop/SamKepskiiBOT/.venv/.env")
+
+>>>>>>> 1587da78b16037c3502743504a3705f87a115717
 # Додавання завдання до бази даних
 
 ADD_TASK_PATH = r"FKEP"
@@ -114,6 +136,42 @@ async def add_folder(message: Message):
 
     CHECK_ADD_TASK_PATH = new_folder_path
 
+<<<<<<< HEAD
+=======
+# Видалити файл або папку в базі даних
+
+@router_admin.message(Command('delete_item'))
+async def delete_item(message: Message):
+    global CHECK_ADD_TASK_PATH
+
+    # Отримуємо ім'я файлу або папки з повідомлення
+    item_name = message.text.split(maxsplit=1)[1] if len(message.text.split()) > 1 else None
+    if not item_name:
+        await message.answer("Вкажіть ім'я файлу або папки після команди.")
+        return
+
+    # Створюємо повний шлях до файлу або папки
+    item_path = os.path.join(CHECK_ADD_TASK_PATH, item_name)
+
+    # Перевіряємо, чи існує файл або папка
+    if os.path.exists(item_path):
+        try:
+            # Якщо це файл, видаляємо його
+            if os.path.isfile(item_path):
+                os.remove(item_path)
+                await message.answer(f"Файл '{item_name}' видалено.")
+            # Якщо це папка, видаляємо її рекурсивно
+            elif os.path.isdir(item_path):
+                import shutil
+                shutil.rmtree(item_path)
+                await message.answer(f"Папка '{item_name}' видалена.")
+        except Exception as e:
+            await message.answer(f"Сталася помилка під час видалення: {e}")
+    else:
+        await message.answer(f"Файл або папка '{item_name}' не існує за шляхом: {item_path}.")
+
+
+>>>>>>> 1587da78b16037c3502743504a3705f87a115717
 # Функція вертає корінь бази даних
 
 @router_admin.message(Command('original_path'))
@@ -261,6 +319,40 @@ async def send_document_to_user(message: types.Message, state: FSMContext ,bot: 
         except Exception as e:
             await message.answer(f"Невдалось видалити файл '{file_path}': {e}")
 
+<<<<<<< HEAD
+=======
+# @router_admin.message(SendTask.document)
+# async def send_document_to_user(message: Message, state: FSMContext, bot: Bot):
+    # if not message.document:
+    #     await message.answer("Будь ласка, надішліть файл.")
+    #     return
+
+#     data = await state.get_data()
+#     user_id = data['user_id']
+
+#     try:
+#         # Завантажуємо документ
+#         file_info = await bot.get_file(message.document.file_id)
+#         file_bytes_io = await bot.download_file(file_info.file_path)
+
+#         # Перевірка, чи правильно ми отримали байти
+#         file_bytes = file_bytes_io.getvalue()  # отримуємо байти з _io.BytesIO
+
+#         # Відправляємо документ користувачу
+#         await bot.send_document(
+#             user_id,
+#             document=FSInputFile(BytesIO(file_bytes), filename=message.document.file_name),
+#             caption="Від адміністратора"
+#         )
+#         await message.answer('Документ успішно надіслано!')
+
+#     except Exception as e:
+#         await message.answer(f"Помилка при відправці документа: {e}")
+#     finally:
+#         await state.clear()
+
+
+>>>>>>> 1587da78b16037c3502743504a3705f87a115717
 # Провірка користувача
 class GetUserInfo(StatesGroup):
     user_id = State()

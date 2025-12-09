@@ -41,6 +41,7 @@ def create_file_folder_buttons(path: str) -> InlineKeyboardMarkup:
             # Якщо це файл
             callback_data = f"file:{item.replace(' ', '_')}"
             buttons.append([InlineKeyboardButton(text=f"📄 {item}", callback_data=callback_data)])
+<<<<<<< HEAD
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
     buttons.append([InlineKeyboardButton(text="Надіслати файл адміністрації", callback_data="file_to_admin"), InlineKeyboardButton(text="На Головну", callback_data="back_to_FKEP")])
 
@@ -294,3 +295,11 @@ def create_file_folder_buttons(path: str) -> InlineKeyboardMarkup:
 # get_number = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Відправити номер',
 #                                                            request_contact=True)]],
 #                                                            resize_keyboard=True)
+=======
+
+    buttons.append([InlineKeyboardButton(text="На Головну", callback_data="back_to_FKEP")])
+
+
+    # Створюємо клавіатуру з кнопками
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+>>>>>>> 1587da78b16037c3502743504a3705f87a115717

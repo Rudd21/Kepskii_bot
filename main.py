@@ -1,11 +1,19 @@
 import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import CommandStart
+<<<<<<< HEAD
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, Message ,InlineKeyboardButton, CallbackQuery
 from aiogram import Router
 from dotenv import load_dotenv
 from app.config import bot, dp, admin_id
+=======
+from aiogram.types import InlineKeyboardMarkup, Message ,InlineKeyboardButton, CallbackQuery
+from aiohttp import web
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
+from aiogram import Router
+from dotenv import load_dotenv
+>>>>>>> 1587da78b16037c3502743504a3705f87a115717
 import os
 
 from app.handlers import router_user, browse_folders, handle_folder_callback
@@ -15,6 +23,7 @@ import app.keyboards as kb
 
 import app.handlers as h
 
+<<<<<<< HEAD
 load_dotenv()
 
 
@@ -26,13 +35,66 @@ async def handle_callback(query: CallbackQuery, state: FSMContext):
         await h.back_to_FKEP(query)
     else:
         await h.handle_folder_callback(query, state) 
+=======
+load_dotenv(dotenv_path="C:/Users/Taras/Desktop/SamKepskiiBOT/.venv/.env")
+# admin_id = 1259689667
+PORT = int(os.getenv("PORT", 443))
+admin_id = 5815674712
+
+RENDER_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME")
+WEBHOOK_PATH = "/webhook"
+WEBHOOK_URL = f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}/webhook"
+
+WEBAPP_HOST = os.getenv("WEBAPP_HOST", "0.0.0.0")
+WEBAPP_PORT = int(os.getenv("PORT", 443))
+
+dp = Dispatcher()
+bot = Bot(token=os.getenv("BOT_TOKEN"))
+
+@dp.callback_query()
+async def handle_callback(query: CallbackQuery):
+    """
+    Обробляє callback від кнопок.
+    """
+    print("Callback_Query відпрацював")
+    if query.data == "back_to_FKEP":
+        await h.back_to_FKEP(query)
+    else:
+        await h.handle_folder_callback(query)
+>>>>>>> 1587da78b16037c3502743504a3705f87a115717
         print(f"Отримано callback_data: {query.data}")
 
 current_dir = h.BASE_DIR
 
+<<<<<<< HEAD
 async def main():
     await async_main()
     bot = Bot(token='7605591332:AAHMNis7iWIfxkpYf5SwC6xcJ1t-9cYBtL8')
+=======
+
+# Функції запуску і завершення роботи
+
+SHUTDOWN_ENABLED = False  # Спочатку вимкнено
+shutdown_delay = 15 * 60  # 15 хвилин в секундах
+
+async def delayed_shutdown():
+    global SHUTDOWN_ENABLED
+    await asyncio.sleep(shutdown_delay)
+    SHUTDOWN_ENABLED = True
+    print("SHUTDOWN_ENABLED змінено на True через 15 хвилин")
+
+async def on_startup():
+    await bot.set_webhook(WEBHOOK_URL)
+    print(f"Вебхук встановлено: {WEBHOOK_URL}")
+
+async def on_shutdown():
+    await bot.delete_webhook()
+    await bot.session.close()
+    print("Вебхук видалено")
+
+async def main():
+    await async_main()  # Ініціалізація бази даних
+>>>>>>> 1587da78b16037c3502743504a3705f87a115717
 
     dp.include_router(router_user)
     dp.include_router(router_admin)
@@ -49,6 +111,10 @@ async def main():
                 "/original_path - вернутись до головної папки\n"
                 "/add_file - додати завдання в папку\n"
                 "/add_folder <Ім'я папки> - додати папку\n"
+<<<<<<< HEAD
+=======
+                "/delete_item <Iм'я папки> - видалити папку або файл"
+>>>>>>> 1587da78b16037c3502743504a3705f87a115717
                 "/send_message - надіслати інформацію користувачу\n"
                 "/to_send_document - надіслати документ користувачу\n"
                 "/download_all_files - завантажити всі файли які були відправлені на перевірку\n"
@@ -61,6 +127,7 @@ async def main():
                 "Це бот для студентів КЕПу\n"
                 "Тут можна знайти конрольні, лабораторні, самостійні роботи раніше терміну:\n\n"
                 "У вас є можливість надіслати 5 завданнь, яких ще немає в боті і получити - допомогу адміністратора з презинтацією, практичною з графічного дизайну, вебсайтом, грою на python, лабораторна з Технологій\n\n"
+<<<<<<< HEAD
                 "Будь ласка не скидуйте завдання від Балабаника, у неї так всі завдання в мудлі\n", reply_markup=keyboard)
 
         
@@ -75,3 +142,40 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("Бот відключений!")
 
+=======
+                "Команди:\n"
+                "/to_send_content - надіслати контект адміністрації\n"
+                "/to_check_progress - перевірка кількості своїх скинутих завданнь\n\n"
+                "Будь ласка не скидуйте завдання від Балабаника, у неї і так всі завдання в мудлі\n", reply_markup=keyboard)
+
+        
+        # await h.browse_folders(message)
+    """
+    Головна функція запуску бота.
+    """
+    # await dp.start_polling(bot)
+
+# Налаштування сервера aiohttp
+async def create_app():
+    app = web.Application()
+
+    # Реєструємо маршрути Aiogram
+    SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path=WEBHOOK_PATH)
+
+    # Налаштовуємо старт
+    app.on_startup.append(lambda _: asyncio.create_task(on_startup()))
+
+    # Запускаємо асинхронну задачу для 15 хвилин
+    asyncio.create_task(delayed_shutdown())
+
+    # Додаємо on_shutdown тільки якщо SHUTDOWN_ENABLED True
+    if SHUTDOWN_ENABLED:
+        app.on_shutdown.append(lambda _: asyncio.create_task(on_shutdown()))
+
+    # Інтегруємо Dispatcher
+    setup_application(app, dp)
+    return app
+
+if __name__ == "__main__":
+    web.run_app(create_app(), host=WEBAPP_HOST, port=WEBAPP_PORT)
+>>>>>>> 1587da78b16037c3502743504a3705f87a115717
